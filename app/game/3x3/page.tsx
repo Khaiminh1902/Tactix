@@ -1,15 +1,13 @@
-// app/game/3x3/page.tsx
-
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Users,
   BrainCircuit,
   Skull,
-  Radiation,
+  Bot,
   RotateCcw,
   GalleryHorizontal,
 } from "lucide-react";
@@ -21,7 +19,7 @@ const theme = {
   text: "text-green-300",
   border: "border-cyan-400/30",
   glow: "hover:border-green-400 hover:shadow-[0_0_30px_#00ffe088]",
-  title: "from-green-400 via-cyan-400 to-teal-300",
+  title: "from-green-400 via-cyan-400 to-teal-300 ",
 };
 
 const SIZE = 3;
@@ -46,7 +44,23 @@ const Page = () => {
   const [glitching, setGlitching] = useState(false);
   const [mode, setMode] = useState("pvp");
   const [winner, setWinner] = useState<null | "X" | "O">(null);
+  const [aiThinking, setAiThinking] = useState(false);
+  const [loadingMode, setLoadingMode] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (mode !== "pvp" && current === "O" && !winner && !aiThinking) {
+      makeAIMove();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, mode]);
+
+  const getBackgroundGradient = () => {
+    if (mode === "impossible") {
+      return "linear-gradient(to bottom right, #330000, #550000, #220000) ";
+    }
+    return `linear-gradient(to bottom right, ${theme.from}, ${theme.via}, ${theme.to})`;
+  };
 
   const checkWinner = (b: (null | "X" | "O")[]) => {
     for (const combo of WINNING_COMBOS) {
@@ -59,7 +73,8 @@ const Page = () => {
   };
 
   const handleClick = (index: number) => {
-    if (winner) return;
+    if (winner || (current === "O" && mode !== "pvp") || aiThinking) return;
+
     const newBoard = [...board];
     const player = current;
 
@@ -91,6 +106,145 @@ const Page = () => {
     }
   };
 
+  const makeAIMove = () => {
+    setAiThinking(true);
+
+    setTimeout(() => {
+      const newBoard = [...board];
+      const ai = "O";
+      const human = "X";
+      let moveIndex = -1;
+
+      switch (mode) {
+        case "easy":
+          moveIndex = getRandomMove(newBoard);
+          break;
+        case "normal":
+          moveIndex = getSmartMove(newBoard, ai, human);
+          break;
+        case "hard":
+          moveIndex = getBetterMove(newBoard, ai, human);
+          break;
+        case "nightmare":
+        case "impossible":
+          moveIndex = getBestMoveMinimax(newBoard, ai, human);
+          break;
+      }
+
+      if (moveIndex === -1) return setAiThinking(false);
+
+      if (placed["O"] < 3) {
+        newBoard[moveIndex] = "O";
+        setPlaced((prev) => ({ ...prev, O: prev.O + 1 }));
+      } else {
+        for (let i = 0; i < SIZE * SIZE; i++) {
+          if (newBoard[i] === "O") {
+            newBoard[i] = null;
+            break;
+          }
+        }
+        newBoard[moveIndex] = "O";
+      }
+
+      setBoard(newBoard);
+      const maybeWinner = checkWinner(newBoard);
+      if (maybeWinner) setWinner(maybeWinner);
+      else setCurrent("X");
+
+      setAiThinking(false);
+    }, 1000 + Math.random() * 1000); // 1–2 seconds
+  };
+
+  const getRandomMove = (b: (null | "X" | "O")[]) => {
+    const options = b
+      .map((cell, idx) => (cell === null ? idx : null))
+      .filter((i): i is number => i !== null);
+    return options[Math.floor(Math.random() * options.length)] ?? -1;
+  };
+
+  const getSmartMove = (
+    b: (null | "X" | "O")[],
+    ai: "X" | "O",
+    player: "X" | "O"
+  ) => {
+    for (const [a, b1, c] of WINNING_COMBOS) {
+      const line = [b[a], b[b1], b[c]];
+      if (line.filter((v) => v === ai).length === 2 && line.includes(null)) {
+        return [a, b1, c][line.indexOf(null)];
+      }
+    }
+    for (const [a, b1, c] of WINNING_COMBOS) {
+      const line = [b[a], b[b1], b[c]];
+      if (
+        line.filter((v) => v === player).length === 2 &&
+        line.includes(null)
+      ) {
+        return [a, b1, c][line.indexOf(null)];
+      }
+    }
+    return getRandomMove(b);
+  };
+
+  const getBetterMove = (
+    b: (null | "X" | "O")[],
+    ai: "X" | "O",
+    player: "X" | "O"
+  ) => {
+    const smart = getSmartMove(b, ai, player);
+    if (smart !== -1) return smart;
+
+    const preferred = [4, 0, 2, 6, 8, 1, 3, 5, 7];
+    return preferred.find((i) => b[i] === null) ?? -1;
+  };
+
+  const getBestMoveMinimax = (
+    b: (null | "X" | "O")[],
+    ai: "X" | "O",
+    player: "X" | "O"
+  ) => {
+    let bestScore = -Infinity;
+    let move = -1;
+
+    for (let i = 0; i < b.length; i++) {
+      if (b[i] === null) {
+        b[i] = ai;
+        const score = minimax(b, 0, false, ai, player);
+        b[i] = null;
+        if (score > bestScore) {
+          bestScore = score;
+          move = i;
+        }
+      }
+    }
+    return move;
+  };
+
+  const minimax = (
+    board: (null | "X" | "O")[],
+    depth: number,
+    isMaximizing: boolean,
+    ai: "X" | "O",
+    player: "X" | "O"
+  ): number => {
+    const winner = checkWinner(board);
+    if (winner === ai) return 10 - depth;
+    if (winner === player) return depth - 10;
+    if (!board.includes(null)) return 0;
+
+    const scores: number[] = [];
+
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === null) {
+        board[i] = isMaximizing ? ai : player;
+        const score = minimax(board, depth + 1, !isMaximizing, ai, player);
+        scores.push(score);
+        board[i] = null;
+      }
+    }
+
+    return isMaximizing ? Math.max(...scores) : Math.min(...scores);
+  };
+
   const handleBack = () => {
     setGlitching(true);
     setTimeout(() => router.back(), 800);
@@ -102,6 +256,7 @@ const Page = () => {
     setSelectedIndex(null);
     setWinner(null);
     setCurrent("X");
+    setAiThinking(false);
   };
 
   const modes = [
@@ -110,22 +265,29 @@ const Page = () => {
     { value: "normal", label: "Normal", icon: BrainCircuit },
     { value: "hard", label: "Hard", icon: BrainCircuit },
     { value: "nightmare", label: "Nightmare", icon: Skull },
-    { value: "impossible", label: "Impossible", icon: Radiation },
+    { value: "impossible", label: "Impossible", icon: Bot },
   ];
 
   return (
     <div
       className="relative min-h-screen px-6 py-12 font-mono text-white overflow-hidden"
       style={{
-        backgroundImage: `linear-gradient(to bottom right, ${theme.from}, ${theme.via}, ${theme.to})`,
+        backgroundImage: getBackgroundGradient(),
       }}
     >
-      {/* Background Grid */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(#00ffe033_1px,transparent_1px)] [background-size:20px_20px] animate-pulse-slow"></div>
 
-      {/* Glitch Overlay */}
       {glitching && (
         <div className="fixed inset-0 z-50 bg-black animate-glitch-fade"></div>
+      )}
+
+      {loadingMode && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
+          <div className="flex items-center gap-2 text-cyan-300 text-sm animate-pulse">
+            <RotateCcw className="w-4 h-4 animate-spin-slow" />
+            <span>Loading Mode...</span>
+          </div>
+        </div>
       )}
 
       <button
@@ -142,12 +304,18 @@ const Page = () => {
           3x3 Cyber Board
         </h1>
 
-        {/* Mode Selector */}
         <div className="mb-6 flex flex-wrap justify-center gap-2 text-sm text-cyan-200">
           {modes.map(({ value, label, icon: Icon }) => (
             <button
               key={value}
-              onClick={() => setMode(value)}
+              onClick={() => {
+                setLoadingMode(true);
+                setTimeout(() => {
+                  setMode(value);
+                  resetGame();
+                  setLoadingMode(false);
+                }, 1000);
+              }}
               className={`px-3 py-1 border ${
                 theme.border
               } rounded-full backdrop-blur-md transition-all duration-200 cursor-pointer flex items-center gap-1 hover:shadow-[0_0_10px_#00fff088] hover:border-green-300 ${
@@ -159,12 +327,13 @@ const Page = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 justify-center">
+        <div className="grid grid-cols-3 gap-4 w-fit mx-auto mt-6 ">
+          {" "}
           {board.map((cell, idx) => (
             <div
               key={idx}
               onClick={() => handleClick(idx)}
-              className={`aspect-square w-20 sm:w-24 flex items-center justify-center text-3xl border ${
+              className={`w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center text-3xl border ${
                 theme.border
               } bg-[#001f2f] transition-all duration-200 rounded-lg cursor-pointer ${
                 selectedIndex === idx ? "ring-2 ring-green-300" : ""
@@ -179,6 +348,13 @@ const Page = () => {
           Current Turn:{" "}
           <span className="font-bold text-green-300">{current}</span>
         </p>
+
+        {aiThinking && mode !== "pvp" && (
+          <div className="mt-2 flex items-center justify-center gap-2 text-cyan-400 animate-pulse text-sm">
+            <Bot className="w-4 h-4 animate-spin-slow" />
+            <span>AI is thinking...</span>
+          </div>
+        )}
 
         {selectedIndex !== null && (
           <p className="mt-2 text-green-400 text-xs">

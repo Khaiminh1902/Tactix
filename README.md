@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tactix
 
-## Getting Started
+Tic Tac Toe, but you only get 3 moves. Then… you move them.
 
-First, run the development server:
+Welcome to Tactix — a strategic remix of the classic game where Xs and Os don’t just sit there. Once you've placed your 3 signs, the real game begins. Slide them around the board, outwit your opponent, and prepare for maximum pettiness.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+💡 What You Can Do
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Play 1v1 or challenge the AI (from Easy to Impossible)
+- Only 3 pieces per player — once placed, you move them
+- Choose from 3x3, 4x4, 5x5, or go infinite (chaos)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+🎮 Game Modes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 👥 Player vs Player
+- 🧠 AI: Easy / Normal / Hard / Nightmare / Impossible
 
-## Learn More
+🛠️ Tech Stack
+| Layer | Tech |
+|----------|----------------------------------|
+| Frontend | Next.js 15, React, Tailwind CSS 4 |
+| Styling | Cyberpunk gradients + glitch FX |
+| Language | TypeScript |
 
-To learn more about Next.js, take a look at the following resources:
+🚀 How It Works
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Click to place your sign — max 3 allowed
+- Once maxed, click your piece to select it, then move it
+- Win by lining up 3 — unless your opponent moves them first
+- Glitch animations make transitions ✨ extra ✨
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+🔧 In Progress
 
-## Deploy on Vercel
+- AI logic for all difficulty modes
+- Win tracking/history and leaderboard
+- Custom board builder
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is created for Summer of Making 2025 - Hackclub

@@ -1,5 +1,3 @@
-// app/page.tsx
-
 "use client";
 
 import React, { useState } from "react";
@@ -31,7 +29,7 @@ const Page = () => {
       } else {
         router.push(`/game/${size}x${size}`);
       }
-    }, 800); // Delay for glitch effect
+    }, 800);
   };
 
   return (
@@ -41,10 +39,8 @@ const Page = () => {
         backgroundImage: `linear-gradient(to bottom right, ${theme.from}, ${theme.via}, ${theme.to})`,
       }}
     >
-      {/* Background Grid */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(#00ffe033_1px,transparent_1px)] [background-size:20px_20px] animate-pulse-slow"></div>
 
-      {/* Glitch Overlay */}
       {glitching && (
         <div className="fixed inset-0 z-50 bg-black animate-glitch-fade"></div>
       )}
@@ -63,7 +59,6 @@ const Page = () => {
           Hacker mode: Select your grid and outplay the system.
         </p>
 
-        {/* Grid Options */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
           {boardSizes.map((size) => (
             <div
@@ -82,7 +77,6 @@ const Page = () => {
             </div>
           ))}
 
-          {/* Custom Mode */}
           <div
             onClick={() => handleClick(0)}
             className={`bg-white/5 border ${theme.border} backdrop-blur-sm hover:scale-105 transition-transform duration-300 rounded-2xl p-6 cursor-pointer shadow-[0_0_20px_#00ffe033] ${theme.glow}`}
@@ -97,7 +91,6 @@ const Page = () => {
             </div>
           </div>
 
-          {/* Infinite Mode */}
           <div
             onClick={() => handleClick(-1)}
             className={`bg-white/5 border ${theme.border} backdrop-blur-sm hover:scale-105 transition-transform duration-300 rounded-2xl p-6 cursor-pointer shadow-[0_0_20px_#00ffe033] ${theme.glow}`}
