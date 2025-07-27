@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -24,7 +24,8 @@ const theme = {
   title: "from-green-400 via-cyan-400 to-teal-300",
 };
 
-const Page = () => {
+// Separate component that uses useSearchParams
+const GameContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -467,6 +468,20 @@ const Page = () => {
         )}
       </div>
     </div>
+  );
+};
+
+const LoadingFallback = () => (
+  <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+    <div className="text-cyan-300 text-lg animate-pulse">Loading game...</div>
+  </div>
+);
+
+const Page = () => {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <GameContent />
+    </Suspense>
   );
 };
 
