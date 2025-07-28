@@ -29,10 +29,4 @@ Welcome to Tactix — a strategic remix of the classic game where Xs and Os don�
 - Win by lining up 3 — unless your opponent moves them first
 - Glitch animations make transitions ✨ extra ✨
 
-🔧 In Progress
-
-- AI logic for all difficulty modes
-- Win tracking/history and leaderboard
-- Custom board builder
-
 This project is created for Summer of Making 2025 - Hackclub
