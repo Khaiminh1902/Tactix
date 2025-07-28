@@ -8,7 +8,6 @@ import {
   BrainCircuit,
   Skull,
   Bot,
-  Radiation,
   RotateCcw,
   GalleryHorizontal,
   Settings,
@@ -322,7 +321,7 @@ const GameContent = () => {
     { value: "normal", label: "Normal", icon: BrainCircuit },
     { value: "hard", label: "Hard", icon: BrainCircuit },
     { value: "nightmare", label: "Nightmare", icon: Skull },
-    { value: "impossible", label: "Impossible", icon: Radiation },
+    { value: "impossible", label: "Impossible", icon: Bot },
   ];
 
   const getCellSize = () => {
